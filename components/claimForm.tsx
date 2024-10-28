@@ -58,10 +58,7 @@ export function RefinedClaimFormComponent() {
     claimReceipts: [],
   })
 
-  const [history, setHistory] = useState(() => {
-    const savedHistory = localStorage.getItem('claimHistory')
-    return savedHistory ? JSON.parse(savedHistory) : []
-  })
+  const [history, setHistory]: any = useState([])
 
   useEffect(() => {
     const savedData = localStorage.getItem('claimFormData')
@@ -362,7 +359,7 @@ export function RefinedClaimFormComponent() {
                   {history.length === 0 ? (
                     <p className="text-gray-600">Ingen historik tillgänglig.</p>
                   ) : (
-                    history.map((entry, index) => (
+                    history.map((entry: any, index: any) => (
                       <div key={index} className="p-4 border rounded-lg shadow-sm">
                         <p><strong>Tågnummer:</strong> {entry.trainNumber}</p>
                         <p><strong>Avgångsdatum:</strong> {entry.departureDate}</p>
@@ -388,12 +385,16 @@ export function RefinedClaimFormComponent() {
                     <AlertDialogTitle>Confirm Submission</AlertDialogTitle>
                     <AlertDialogDescription>
                       <p>Headers:</p>
-                      <pre>{JSON.stringify({
-                        'accept': 'application/json;charset=UTF-8',
-                        'content-type': 'application/json',
-                      }, null, 2)}</pre>
+                      <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', overflowX: 'auto' }}>
+                        {JSON.stringify({
+                          'accept': 'application/json;charset=UTF-8',
+                          'content-type': 'application/json',
+                        }, null, 2)}
+                      </pre>
                       <p>Payload:</p>
-                      <pre>{JSON.stringify(formData, null, 2)}</pre>
+                      <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', overflowX: 'auto' }}>
+                        {JSON.stringify(formData, null, 2)}
+                      </pre>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
