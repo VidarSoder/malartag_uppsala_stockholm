@@ -78,7 +78,7 @@ export function RefinedClaimFormComponent() {
     })
   }
 
-  const handleInputChange = (e: { target: { name: any; value: any } }) => {
+  const handleInputChange = (e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
@@ -89,6 +89,7 @@ export function RefinedClaimFormComponent() {
     }))
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleMainInputChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
 
