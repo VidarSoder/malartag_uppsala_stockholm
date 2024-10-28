@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
@@ -27,37 +28,40 @@ const stations = [
   { id: "cf09cbb1-fd82-4b83-9c09-87bc8fc2f018", name: "Uppsala" },
 ]
 
-const defaultCustomer = {
-  customer: {
-    id: "00000000-0000-0000-0000-000000000000",
-    firstName: "",
-    surName: "",
-    city: "",
-    postalCode: "",
-    streetNameAndNumber: "",
-    identityNumber: "",
-    bankAccountNumber: "",
-    mobileNumber: "",
-    email: "",
-    clearingNumber: "",
-  },
-  ticketNumber: "",
-  ticketType: 1,
-  departureStationId: "",
-  arrivalStationId: "",
-  fullTicketRefund: false,
-  departureDate: "",
-  status: 0,
-  trainNumber: "20958",
-  refundType: {
-    id: "00000000-0000-0000-0000-000000000000",
-    name: "Payment via Swedbank SUS",
-  },
-  claimReceipts: [],
-}
-
 export function RefinedClaimFormComponent() {
-  const [formData, setFormData] = useState(defaultCustomer)
+  const [formData, setFormData] = useState({
+    customer: {
+      id: "00000000-0000-0000-0000-000000000000",
+      firstName: "",
+      surName: "",
+      city: "",
+      postalCode: "",
+      streetNameAndNumber: "",
+      identityNumber: "",
+      bankAccountNumber: "",
+      mobileNumber: "",
+      email: "",
+      clearingNumber: "",
+    },
+    ticketNumber: "",
+    ticketType: 1,
+    departureStationId: "",
+    arrivalStationId: "",
+    fullTicketRefund: false,
+    departureDate: "",
+    status: 0,
+    trainNumber: "20958",
+    refundType: {
+      id: "00000000-0000-0000-0000-000000000000",
+      name: "Payment via Swedbank SUS",
+    },
+    claimReceipts: [],
+  })
+
+  const [history, setHistory] = useState(() => {
+    const savedHistory = localStorage.getItem('claimHistory')
+    return savedHistory ? JSON.parse(savedHistory) : []
+  })
 
   useEffect(() => {
     const savedData = localStorage.getItem('claimFormData')
@@ -65,6 +69,32 @@ export function RefinedClaimFormComponent() {
       setFormData(JSON.parse(savedData))
     }
   }, [])
+
+  const handleInputChange = (e: { target: { name: string; value: string } }) => {
+    const { name, value } = e.target
+    setFormData((prevData) => ({
+      ...prevData,
+      customer: {
+        ...prevData.customer,
+        [name]: value,
+      },
+    }))
+  }
+
+  const handleMainInputChange = (e: { target: { name: string; value: string } }) => {
+    const { name, value } = e.target
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }))
+  }
+
+  const handleStationChange = (value: string, type: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [type]: value,
+    }))
+  }
 
   const handleSave = () => {
     localStorage.setItem('claimFormData', JSON.stringify(formData))
@@ -78,43 +108,13 @@ export function RefinedClaimFormComponent() {
     })
   }
 
-  const handleInputChange = (e: { target: { name: string; value: string } }) => {
-    const { name, value } = e.target
-    setFormData((prevData) => ({
-      ...prevData,
-      customer: {
-        ...prevData.customer,
-        [name]: value,
-      },
-    }))
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleMainInputChange = (e: { target: { name: any; value: any } }) => {
-    const { name, value } = e.target;
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-
-  };
-
-  const handleStationChange = (value: string, type: string) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [type]: value,
-    }))
-  }
-
   const confirmSubmit = async () => {
+    const formattedFormData = {
+      ...formData,
+      departureDate: new Date(formData.departureDate).toISOString(),
+    }
+
     try {
-
-      const formattedFormData = {
-        ...formData,
-        departureDate: new Date(formData.departureDate).toISOString(),
-      };
-
       const response = await fetch('/api/proxy', {
         method: 'POST',
         headers: {
@@ -125,6 +125,16 @@ export function RefinedClaimFormComponent() {
       })
 
       if (response.ok) {
+        // Save history
+        const newHistoryEntry = {
+          trainNumber: formData.trainNumber,
+          departureDate: formData.departureDate,
+          requestTime: new Date().toISOString(),
+        }
+        const updatedHistory = [...history, newHistoryEntry]
+        setHistory(updatedHistory)
+        localStorage.setItem('claimHistory', JSON.stringify(updatedHistory))
+
         toast.success('Reklamationen skickades framgångsrikt!', {
           position: "top-center",
           autoClose: 3000,
@@ -159,22 +169,25 @@ export function RefinedClaimFormComponent() {
   return (
     <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-5xl bg-white shadow-md relative">
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="absolute top-4 right-4">
+        <a href="https://github.com/VidarSoder/malartag_uppsala_stockholm" target="_blank" rel="noopener noreferrer" className="absolute top-4 right-4">
           <Github className="h-6 w-6 text-gray-500 hover:text-gray-700" />
         </a>
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-gray-800">Skicka in din reklamation</CardTitle>
-          <CardDescription className="text-lg text-gray-600">Vi hjälper dig med din återbetalning</CardDescription>
+          <CardDescription className="text-lg text-gray-600">Allting sparas lokalt i din webbläsare.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 rounded-xl bg-gray-100 p-1">
+              <TabsList className="grid w-full grid-cols-3 rounded-xl bg-gray-100 p-1">
                 <TabsTrigger value="personal" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-gray-800">
-                  Personlig information
+                  Person
                 </TabsTrigger>
                 <TabsTrigger value="trip" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-gray-800">
-                  Reseinformation
+                  Resa
+                </TabsTrigger>
+                <TabsTrigger value="history" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-gray-800">
+                  History
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="personal" className="mt-6">
@@ -331,6 +344,32 @@ export function RefinedClaimFormComponent() {
                       className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="trainNumber" className="text-gray-700">Tågnummer</Label>
+                    <Input
+                      id="trainNumber"
+                      name="trainNumber"
+                      value={formData.trainNumber}
+                      onChange={handleMainInputChange}
+                      required
+                      className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="history" className="mt-6">
+                <div className="space-y-4">
+                  {history.length === 0 ? (
+                    <p className="text-gray-600">Ingen historik tillgänglig.</p>
+                  ) : (
+                    history.map((entry, index) => (
+                      <div key={index} className="p-4 border rounded-lg shadow-sm">
+                        <p><strong>Tågnummer:</strong> {entry.trainNumber}</p>
+                        <p><strong>Avgångsdatum:</strong> {entry.departureDate}</p>
+                        <p><strong>Begäran gjordes:</strong> {entry.requestTime}</p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
