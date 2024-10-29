@@ -385,7 +385,7 @@ export function RefinedClaimFormComponent() {
                     <AlertDialogTitle>Confirm Submission</AlertDialogTitle>
                     <AlertDialogDescription>
                       <p>Headers:</p>
-                      <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', overflowX: 'auto' }}>
+                      <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', overflowX: 'auto', width: '200px', height: '150px' }}>
                         {JSON.stringify({
                           'accept': 'application/json;charset=UTF-8',
                           'content-type': 'application/json',
