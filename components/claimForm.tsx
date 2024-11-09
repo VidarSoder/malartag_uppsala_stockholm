@@ -392,9 +392,6 @@ export function RefinedClaimFormComponent() {
                         }, null, 2)}
                       </pre>
                       <p>Payload:</p>
-                      <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', overflowX: 'auto' }}>
-                        {JSON.stringify(formData, null, 2)}
-                      </pre>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
